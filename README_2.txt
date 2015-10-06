@@ -1,0 +1,1 @@
+Nur implementierte Funktionen benutzt, keine Schleifen etc => Effizienz sollte passen
