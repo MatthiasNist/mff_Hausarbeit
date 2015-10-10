@@ -91,10 +91,66 @@ max_corr_disp(1).Color = 'blue';
 max_corr_disp(1).FontSize = 7;
 
 %% scatterplot of (sigma_i, mu_i) 
-
-figure()
+hold off
 plot(param_table.std_dev, param_table.expected, 'r.')
 xlabel('standard deviation')
 ylabel('expected percentage return')
 title('Statistics of DAX-30s Companies (2000 - 2015)')
+hold on
+
+%% estimating portfolio components:
+
+% weigth_1 drawn from U([0, 1])
+w_dbk = unifrnd(0,1, 200);
+
+% weight_2 = 1- weight_1 becauso of restriction sum(w_1, w_2) = 1
+w_dpw = 1 - w_dbk;
+
+%test:
+w_dbk + w_dpw % immer 1
+
+% estimating expected portfolio return:
+portfolio_ret = w_dpw*param_table{'DPW_DE', 'expected'} + ...
+    w_dbk*param_table{'DBK_DE', 'expected'};
+
+% Covariance beteewn DBK_DE (index: 11) und DPW_DE (index: 12):
+cov_dbk_dpw = cov(dax_comp_ret_disc_array(:, 11) , ...
+    dax_comp_ret_disc_array(:, 12) , 'omitrows');
+
+% estimating portfolio standard deviation:
+portfolio_std_dev = sqrt((w_dpw.^2)*param_table{'DPW_DE', 'std_dev'}^2 +...
+    (w_dbk.^2)*param_table{'DBK_DE', 'std_dev'}^2 + ...
+    2*(w_dpw.*w_dbk)*cov_dbk_dpw(1,2));
+
+% plotting of portfolio-values:
+plot(portfolio_std_dev, portfolio_ret, 'b.')
+hold on
+
+
+% highlighting the represantitives of DBK_DE and DPW_DE
+dbk_dpw = plot([param_table{'DPW_DE', 'std_dev'}, param_table{'DBK_DE', ...
+    'std_dev'}], [param_table{'DPW_DE', 'expected'}, param_table{'DBK_DE',...
+    'expected'}], 'go')
+set(dbk_dpw,'MarkerEdgeColor','none','MarkerFaceColor','g')
+legend('DAX-30s without DBK/DPW', 'simulated weights DBK/DPW', ...
+    'location', 'southwest')
+
+dpw_display = text(param_table{'DPW_DE', 'std_dev'}, ...
+    param_table{'DPW_DE', 'expected'}+0.004, 'DPW_DE', 'interpreter', 'none')
+dpw_display(1).Color = 'green';
+dpw_display(1).FontSize = 6;
+
+dbk_display = text(param_table{'DBK_DE', 'std_dev'}, ...
+    param_table{'DBK_DE', 'expected'}+0.004, 'DBK_DE', 'interpreter', 'none')
+dbk_display(1).Color = 'green';
+dbk_display(1).FontSize = 6;
+
+% findnan(dax_comp_ret_struct.dax_ret(:,100))
+% 
+% 
+% mean(dax_comp_ret_struct.dax_ret(1:1600,1))
+% dax_comp_ret_struct.dax_ret(1600:1700,1)
+% 
+% mean(dax_comp_ret_struct.dax_ret(:,1), 'omitnan')
+
 
