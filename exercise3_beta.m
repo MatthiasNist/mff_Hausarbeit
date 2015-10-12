@@ -154,11 +154,68 @@ dbk_display(1).FontSize = 6;
 
 
 % muss überarbeitet werden...
-w_1_3 = unif_random(4); % my own function to simulate weigths
-w_1 = w_dpw_tka_cbk(:, 1);
-w_2 = w_dpw_tka_cbk(:, 2);
-w_3 = w_dpw_tka_cbk(:, 3);
-w_4 = 1 - sum(w_dpw_tka_cbk, 2);
+% w_dpw_tka_cbk = unif_random(4); % my own function to simulate weigths
+% w_dpw = w_dpw_tka_cbk(:, 1);
+% w_tka = w_dpw_tka_cbk(:, 2);
+% w_cbk = w_dpw_tka_cbk(:, 3);
+% w_dbk = 1 - sum(w_dpw_tka_cbk, 2);
+% 
+% %tests on constraints:
+% (min(w_dpw) > 0) + (min(w_tka) > 0) + (min(w_cbk) > 0) + (min(w_dbk) > 0) == 4
+% any(w_dpw + w_tka + w_cbk + w_dbk) ~= 1 
+% mean(w_dpw)
+% mean(w_tka)
+% mean(w_cbk)
+% mean(w_dbk)
+% w_4 has different variance than the others but there ist no
+% constraint about that...
+
+
+%%
+
+w_dpw_tka_cbk = unif_random2(); % my own function to simulate weigths
+
+%extracting weights:
+w_dpw = w_dpw_tka_cbk(:, 1);
+w_tka = w_dpw_tka_cbk(:, 2);
+w_cbk = w_dpw_tka_cbk(:, 3);
+w_dbk = 1 - sum(w_dpw_tka_cbk, 2);
+
+ %tests on constraints:
+(min(w_dpw) > 0) + (min(w_tka) > 0) + (min(w_cbk) > 0) + (min(w_dbk) > 0) == 4
+any(w_dpw + w_tka + w_cbk + w_dbk) ~= 1 
+mean(w_dpw)
+mean(w_tka)
+mean(w_cbk)
+mean(w_dbk)
+
+
+%%
+
+% MIT MATRIZEN:
+
+% w_dpw_tka_cbk = exp_random(3); % my own function to simulate weigths
+% w_dpw = w_dpw_tka_cbk(:, 1);
+% w_tka = w_dpw_tka_cbk(:, 2);
+% w_cbk = w_dpw_tka_cbk(:, 3);
+% 
+% % estimating w_dbk by sorting and adding the three simulated vectors
+% 
+% w_dpw = sort(w_dpw, 'ascend')
+% w_tka = sort(w_tka, 'descend')
+% w_dpw_tka = w_dpw + w_tka
+% w_dpw_tka_asc = sort(w_dpw_tka, 'ascend')
+% w_cbk = sort(w_cbk, 'descend')
+% w_dpw_tka_cbk_prep = w_dpw_tka_asc + w_cbk
+% w_dbk = 1 - sum(w_dpw_tka_cbk_prep, 2)
+% sum(w_dpw_tka_cbk_prep > 1)
+%%
+
+% hold off
+% hist(w_dpw)
+% hist(w_tka)
+% hist(w_dpw)
+% hist(w_dpw)
 
 %tests on constraints:
 (min(w_dpw) > 0) + (min(w_tka) > 0) + (min(w_cbk) > 0) + (min(w_dbk) > 0) == 4
@@ -170,20 +227,16 @@ mean(w_dbk)
 % w_4 has different variance than the others but there ist no
 % constraint about that...
 
-%%
+%% estimating portfolio expected return 
 
-% MIT MATRIZEN:
-
-w_dpw_tka_cbk = unif_random(4); % my own function to simulate weigths
-w_dbk = 1 - sum(w_dpw_tka_cbk, 2)
-w_dpw_tka_cbk_dbk = [w_dpw_tka_cbk, w_dbk]
+w_dpw_tka_cbk_dbk = [w_dpw_tka_cbk, w_dbk];
 
 matrix_ret_exp_4 = [param_table{'DPW_DE', 'expected'}, ...
     param_table{'TKA_DE', 'expected'}, ...
     param_table{'CBK_DE', 'expected'}, ...
     param_table{'DBK_DE', 'expected'}];
 
-portfolio_ret_4 = w_dpw_tka_cbk_dbk*(matrix_ret_exp_4') % expected return output !!!!!!!!!!!!!!!!!!!!!!!
+portfolio_ret_4 = w_dpw_tka_cbk_dbk*(matrix_ret_exp_4'); 
 
 %% estimating portfolio statistics:
 
@@ -207,7 +260,7 @@ portfolio_ret_4 = w_dpw_tka_cbk_dbk*(matrix_ret_exp_4') % expected return output
 % estimating covariance-matrix with cov()
 matrix_ret_4 = [dax_comp_ret_disc_array(:, 12), ...
     dax_comp_ret_disc_array(:, 29), dax_comp_ret_disc_array(:, 7), ...
-    dax_comp_ret_disc_array(:, 11)]
+    dax_comp_ret_disc_array(:, 11)];
 
 matrix_cov_4 = cov(matrix_ret_4,'omitrows');
 
@@ -221,18 +274,18 @@ matrix_sd_4 = [param_table{'DPW_DE', 'std_dev'}, ...
 
 % extracting vecor with all covariances
 vector_cov_4 = [matrix_cov_4(1, 2:4), matrix_cov_4(2, 3:4), ...
-    matrix_cov_4(3,4)]
+    matrix_cov_4(3,4)];
 
 % estimating weight-products:
 vector_w_products = [w_dpw_tka_cbk_dbk(:,1:3).*w_dpw_tka_cbk_dbk(:,2:4),...
     w_dpw_tka_cbk_dbk(:,1:2).*w_dpw_tka_cbk_dbk(:,3:4),...
-    w_dpw_tka_cbk_dbk(:,1).*w_dpw_tka_cbk_dbk(:,4)]
+    w_dpw_tka_cbk_dbk(:,1).*w_dpw_tka_cbk_dbk(:,4)];
 
 % estimating portfolio standard deviation:
 portfolio_std_dev_4 = sqrt((w_dpw_tka_cbk_dbk.^2)*(matrix_sd_4.^2)'+2*(vector_w_products* ...
-    vector_cov_4'))         %                        expected return output !!!!!!!!!!!!!!!!!!!!!!!
+    vector_cov_4'));      
 
-%%
+%% plotting again
 
 hold off
 plot(param_table.std_dev, param_table.expected, 'r.')
@@ -245,22 +298,22 @@ plot(portfolio_std_dev_4, portfolio_ret_4, 'b.')
 hold on
 dpw_display = text(param_table{'DPW_DE', 'std_dev'}, ...
     param_table{'DPW_DE', 'expected'}+0.004, 'DPW_DE', 'interpreter', 'none')
-dpw_display(1).Color = 'green';
+dpw_display(1).Color = 'black';
 dpw_display(1).FontSize = 6;
 
 dbk_display = text(param_table{'DBK_DE', 'std_dev'}, ...
     param_table{'DBK_DE', 'expected'}+0.004, 'DBK_DE', 'interpreter', 'none')
-dbk_display(1).Color = 'green';
+dbk_display(1).Color = 'black';
 dbk_display(1).FontSize = 6;
 
 dbk_display = text(param_table{'CBK_DE', 'std_dev'}, ...
     param_table{'CBK_DE', 'expected'}+0.004, 'CBK_DE', 'interpreter', 'none')
-dbk_display(1).Color = 'green';
+dbk_display(1).Color = 'black';
 dbk_display(1).FontSize = 6;
 
 dbk_display = text(param_table{'TKA_DE', 'std_dev'}, ...
     param_table{'TKA_DE', 'expected'}+0.004, 'TKA_DE', 'interpreter', 'none')
-dbk_display(1).Color = 'green';
+dbk_display(1).Color = 'black';
 dbk_display(1).FontSize = 6;
 
 
