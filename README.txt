@@ -1,3 +1,5 @@
+PART 1: ======================================
+
 get and prepare data:-------------------------
 
 getPrices hab ich etwas abgeaendert, da ja kein "tableContainer" mehr notwendig ist, weil nur ein Aktienkurs, der der DBK eingelesen wird.
@@ -19,4 +21,21 @@ Wieso heisst es bei der vorletzten Aufgabe: "again (?), compare the empirical au
 returns for real world data with the counterpart of the default model."...?
 
 simulierte Daten unterscheiden sich ziemlich stark...?
+
+
+PART 2: ======================================
+
+Ich hab jetzt zwei getPrices-Funktionen: Eine die nur einen Table einliest (für die DBK-Daten) mit Namen "getPrices" und eine die einen ganzen cell_array an Tablen einlesen kann mit Namen "getPrices_multi".
+
+für getPrices_multi braucht es noch folgende, zusaetzliche Funktionen: 
+
+- joinStockPriceSeries
+
+- joinMultipleTables
+
+Anmerkung: "discrete percentage return" ist jetzt letztlich als prozentuale Veränderung von Jahr zu Jahr implementiert (Definition Rendite, siehe "diskrete rendite": https://de.wikipedia.org/wiki/Rendite). 
+
+Für diese implementierung habe ich die ursprüngliche Funktion "price2retWithHolidays" in "price2disc_retWithHolidays" abgeändert, die jetzt eine Matrix (sinnvoller für weitere Verwenung als ein table) mit den diskreten Renditen in Prozent ausgibt.
+
+
 

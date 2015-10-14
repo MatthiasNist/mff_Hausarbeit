@@ -1,3 +1,4 @@
+%% PART2---------------------1. Teilaufgabe--------------------------------
 % specifying all DAX-listed companies (https://de.finance.yahoo.com/q/cp?s=%5EGDAXI):
 ticker_symbs = {'ADS.DE','ALV.DE', 'BAS.DE','BAYN.DE','BEI.DE','BMW.DE',...
     'CBK.DE', 'CON.DE','DAI.DE','DB1.DE', 'DBK.DE','DPW.DE','DTE.DE', ...
@@ -15,23 +16,15 @@ dax_comp = getPrices_multi(dateBeg,dateEnd, ticker_symbs);
 size(dax_comp, 2) % 30
 
 
-%% estimating discrete returns, expected percentage return and std. dev.
+%% 2.Teilaufgabe: estimating discrete returns, expected percentage return 
+%  and standard deviation
 
-% transform to discrete returns: exp(log(a)) = a                        
-% here: in price2retWithHolidays: log(prices(2:end)/prices(1:end-1)) 
-% = log(prices(2:end) - log(prices(1:end-1) => Output                            
-% to get: prices(2:end)/prices(1:end-1) compute exp() on Output of
-% price2retWithHolidays.
+dax_comp_ret = price2disc_retWithHolidays(dax_comp); % this function
+% returns a matrix with dicrete percentage returns, returns defined as:
+% 100*[((price(t+1) - price(t))/price(t)]
 
-dax_comp_ret = price2retWithHolidays(dax_comp);
-
-% converting logRets to array (to apply exp()-fct) and back to table
-row_names = dax_comp_ret.Properties.RowNames;
-col_names = dax_comp_ret.Properties.VariableNames;
-dax_comp_ret_disc_array = 100*exp(table2array(dax_comp_ret));
-
-% crating a structure of the data:
-dax_comp_ret_struct = struct('dax_ret', dax_comp_ret_disc_array)
+% creating a structure of the data:
+dax_comp_ret_struct = struct('dax_ret', dax_comp_ret);
 
 % expected discrete percentage return:
 exp_ret = mean(dax_comp_ret_struct.dax_ret, 'omitnan');
@@ -41,15 +34,13 @@ sigma_ret = sqrt(var(dax_comp_ret_struct.dax_ret, 'omitnan'));
 
 % relabelling of table:
 
+col_names = dax_comp.Properties.VariableNames; %odering hasn't changed...
 param_matrix = [exp_ret(:), sigma_ret(:)]
 param_table = array2table(param_matrix);
-param_table.Properties.RowNames = col_names;
+param_table.Properties.RowNames = col_names; %ticker-symbols as col. names
 param_table.Properties.VariableNames = {'expected' 'std_dev'}
 
-%% estimating the correlation coefficients: 
-
-% % saving vector of companies' names
-% names_vec = dax_comp_ret_disc.Properties.VariableNames
+%% 3. Teilaufgabe: estimating the correlation coefficients: 
 
 %correlation matrix of all companies, pairwise:
 corr_matrix = corrcoef(dax_comp_ret_struct.dax_ret,'rows','pairwise')
@@ -63,7 +54,7 @@ corr_vec = corr_matrix_up(corr_matrix_up~=1 & corr_matrix_up~=0)
 %test:
 length(corr_vec) % = 435 = 30*(29/2) (s. Angabe)
 
-%% plotting histogramm:
+%% 4. Teilaufgabe: plotting histogramm concerning correlations:
 
 n_bins = 20;
 
@@ -75,7 +66,7 @@ ylabel('density')
 title('Histogramm of correlations concerning returns of DAX-30s (2000 - 2015)')
 hold on
 
-%% displaying pair of highest estimated correlation-coefficient:
+%% 5. Teilaufgabe: displaying pair of highest estimated correlation-coeff.:
 
 % finding the index of the highest correaltion in corr_matrix_up
 max_corr = max(corr_vec)
@@ -90,7 +81,7 @@ max_corr_disp = text(max_corr-0.05, 5, [col_names(max_row_index), ...
 max_corr_disp(1).Color = 'blue';
 max_corr_disp(1).FontSize = 7;
 
-%% scatterplot of (sigma_i, mu_i) 
+%% 6. Teilaufgabe: scatterplot of (sigma_i, mu_i) 
 % hold off
 figure
 plot(param_table.std_dev, param_table.expected, 'r.')
@@ -99,7 +90,7 @@ ylabel('expected percentage return')
 title('Statistics of DAX-30s Companies (2000 - 2015)')
 hold on
 
-%% estimating portfolio components:
+%% 7. Teilaufgabe: estimating and plotting portfolio components (i = 2):
 
 % weigth_1 drawn from U([0, 1])
 w_dbk = unifrnd(0,1, 200, 1);
@@ -115,8 +106,8 @@ portfolio_ret = w_dpw.*param_table{'DPW_DE', 'expected'} + ...
     w_dbk.*param_table{'DBK_DE', 'expected'};
 
 % Covariance beteewn DBK_DE (index: 11) und DPW_DE (index: 12):
-cov_dbk_dpw = cov(dax_comp_ret_disc_array(:, 11) , ...
-    dax_comp_ret_disc_array(:, 12) , 'omitrows');
+cov_dbk_dpw = cov(dax_comp_ret(:, 11) , ...
+    dax_comp_ret(:, 12) , 'omitrows');
 
 % estimating portfolio standard deviation:
 portfolio_std_dev = sqrt((w_dpw.^2).*param_table{'DPW_DE', 'std_dev'}^2 +...
@@ -126,7 +117,6 @@ portfolio_std_dev = sqrt((w_dpw.^2).*param_table{'DPW_DE', 'std_dev'}^2 +...
 % plotting of portfolio-values:
 plot(portfolio_std_dev, portfolio_ret, 'b.')
 hold on
-
 
 % highlighting the represantitives of DBK_DE and DPW_DE
 dbk_dpw = plot([param_table{'DPW_DE', 'std_dev'}, param_table{'DBK_DE', ...
@@ -146,32 +136,7 @@ dbk_display = text(param_table{'DBK_DE', 'std_dev'}, ...
 dbk_display(1).Color = 'green';
 dbk_display(1).FontSize = 6;
 
-%% vorletzte Teilaufgabe part 2
-
-% simulating weights:
-% because of restriction w_1/w_2/w_3/w_4 > 0 the best way is to draw from a 
-% uniform distribution 
-
-
-% muss überarbeitet werden...
-% w_dpw_tka_cbk = unif_random(4); % my own function to simulate weigths
-% w_dpw = w_dpw_tka_cbk(:, 1);
-% w_tka = w_dpw_tka_cbk(:, 2);
-% w_cbk = w_dpw_tka_cbk(:, 3);
-% w_dbk = 1 - sum(w_dpw_tka_cbk, 2);
-% 
-% %tests on constraints:
-% (min(w_dpw) > 0) + (min(w_tka) > 0) + (min(w_cbk) > 0) + (min(w_dbk) > 0) == 4
-% any(w_dpw + w_tka + w_cbk + w_dbk) ~= 1 
-% mean(w_dpw)
-% mean(w_tka)
-% mean(w_cbk)
-% mean(w_dbk)
-% w_4 has different variance than the others but there ist no
-% constraint about that...
-
-
-%%
+%% 8. Teilaufgabe: Portfolio components simulation:
 
 w_dpw_tka_cbk = unif_random2(); % my own function to simulate weigths
 
@@ -189,44 +154,6 @@ mean(w_tka)
 mean(w_cbk)
 mean(w_dbk)
 
-
-%%
-
-% MIT MATRIZEN:
-
-% w_dpw_tka_cbk = exp_random(3); % my own function to simulate weigths
-% w_dpw = w_dpw_tka_cbk(:, 1);
-% w_tka = w_dpw_tka_cbk(:, 2);
-% w_cbk = w_dpw_tka_cbk(:, 3);
-% 
-% % estimating w_dbk by sorting and adding the three simulated vectors
-% 
-% w_dpw = sort(w_dpw, 'ascend')
-% w_tka = sort(w_tka, 'descend')
-% w_dpw_tka = w_dpw + w_tka
-% w_dpw_tka_asc = sort(w_dpw_tka, 'ascend')
-% w_cbk = sort(w_cbk, 'descend')
-% w_dpw_tka_cbk_prep = w_dpw_tka_asc + w_cbk
-% w_dbk = 1 - sum(w_dpw_tka_cbk_prep, 2)
-% sum(w_dpw_tka_cbk_prep > 1)
-%%
-
-% hold off
-% hist(w_dpw)
-% hist(w_tka)
-% hist(w_dpw)
-% hist(w_dpw)
-
-%tests on constraints:
-(min(w_dpw) > 0) + (min(w_tka) > 0) + (min(w_cbk) > 0) + (min(w_dbk) > 0) == 4
-any(w_dpw + w_tka + w_cbk + w_dbk) ~= 1 
-mean(w_dpw)
-mean(w_tka)
-mean(w_cbk)
-mean(w_dbk)
-% w_4 has different variance than the others but there ist no
-% constraint about that...
-
 %% estimating portfolio expected return 
 
 w_dpw_tka_cbk_dbk = [w_dpw_tka_cbk, w_dbk];
@@ -238,29 +165,11 @@ matrix_ret_exp_4 = [param_table{'DPW_DE', 'expected'}, ...
 
 portfolio_ret_4 = w_dpw_tka_cbk_dbk*(matrix_ret_exp_4'); 
 
-%% estimating portfolio statistics:
-
-%UMSTAENDLICH:
-
-% estimating expected portfolio return:
-% portfolio_ret_4 = w_1.*param_table{'DPW_DE', 'expected'} + ...
-%     w_2.*param_table{'TKA_DE', 'expected'} + ...
-%     w_3.*param_table{'CBK_DE', 'expected'} + ...
-%     w_4.*param_table{'DBK_DE', 'expected'};
-
-%%
-% Covariance between DPW_DE (index: 12)/ TKA_DE (index: 29)/ CBK_DE 
-% (index: 7)/ DBK_DE (index: 11):
-
-% matrix_ret_4 = [dax_comp_ret_disc_array(:, 12), ...
-%     dax_comp_ret_disc_array(:, 29), dax_comp_ret_disc_array(:, 7), ...
-%     dax_comp_ret_disc_array(:, 11)]
-
 %%
 % estimating covariance-matrix with cov()
-matrix_ret_4 = [dax_comp_ret_disc_array(:, 12), ...
-    dax_comp_ret_disc_array(:, 29), dax_comp_ret_disc_array(:, 7), ...
-    dax_comp_ret_disc_array(:, 11)];
+matrix_ret_4 = [dax_comp_ret(:, 12), ...
+    dax_comp_ret(:, 29), dax_comp_ret(:, 7), ...
+    dax_comp_ret(:, 11)];
 
 matrix_cov_4 = cov(matrix_ret_4,'omitrows');
 
@@ -287,7 +196,7 @@ portfolio_std_dev_4 = sqrt((w_dpw_tka_cbk_dbk.^2)*(matrix_sd_4.^2)'+2*(vector_w_
 
 %% plotting again
 
-hold off
+figure
 plot(param_table.std_dev, param_table.expected, 'r.')
 xlabel('standard deviation')
 ylabel('expected percentage return')
@@ -316,31 +225,17 @@ dbk_display = text(param_table{'TKA_DE', 'std_dev'}, ...
 dbk_display(1).Color = 'black';
 dbk_display(1).FontSize = 6;
 
+%% letzte Teilaufgabe:
 
-%%
-
-% estimating weight-products:
-vector_w_products = [w_dpw_tka_cbk_dbk(:,1:3).*w_dpw_tka_cbk_dbk(:,2:4),...
-    w_dpw_tka_cbk_dbk(:,1:2).*w_dpw_tka_cbk_dbk(:,3:4),...
-    w_dpw_tka_cbk_dbk(:,1).*w_dpw_tka_cbk_dbk(:,4)]
-    % 1:3
-
-w_tka_cbk_dbk = test
-
-w_tka_cbk_dbk(:,1) = [] % 2:4
-
-test2 = w_dpw_tka_cbk.*w_tka_cbk_dbk
-
-
-
-
-
-% findnan(dax_comp_ret_struct.dax_ret(:,100))
-% 
-% 
-% mean(dax_comp_ret_struct.dax_ret(1:1600,1))
-% dax_comp_ret_struct.dax_ret(1600:1700,1)
-% 
-% mean(dax_comp_ret_struct.dax_ret(:,1), 'omitnan')
+% Wünschenswerte Punkte aus Sicht eines Anlegers sind diejenigen, die 
+% möglichst weit links (geringe Standardabweichung, geht einher mit 
+% Risikoaversion der Anleger) und möglichst weit oben (hohe erwartete 
+% Rendite) liegen. Eine analytische Lösung wäre mit einem linearen 
+% Optimierungsverfahren bestimmbar. Die Menge der optimalen Lösungen eines 
+% solchen Ansatzes wäre in der Menge der Extremalpunkte zu erwarten, also 
+% jener Punkte, die das blaue Polyeder umschließen. Extremalpunkte sind als
+% Verbindungspunkte von Schnitten der Kanten definiert. 
+% Letztlich wäre aus der Menge der Extremalpunkte der Extremalpunkt ganz
+% oben links im blauen Bereich als optimale analytische Lösung zu erwarten.
 
 
