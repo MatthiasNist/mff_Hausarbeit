@@ -100,8 +100,8 @@ subplot(2, 1, 1)
 autocorr(auto_corr_coef_real)
 title('Autocorrelation Function - real world data')
 
-subplot(2,1,2)
-autocorr(auto_corr_coef_real)
+subplot(2, 1, 2)
+autocorr(auto_corr_coef_sim)
 title('Autocorrelation Function - simulated data')
 
 %% letzte Teilaufgabe (exercise 1)
