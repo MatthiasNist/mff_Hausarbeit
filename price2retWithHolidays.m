@@ -22,3 +22,4 @@ retsTable = prices(2:end, :);
 retsTable{:, :} = rets;
 
 end
+

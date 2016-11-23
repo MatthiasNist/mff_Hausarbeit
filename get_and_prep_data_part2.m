@@ -36,3 +36,4 @@ dax_comp_ret_disc_array = 100*exp(table2array(dax_comp_ret));
 dax_comp_ret_disc = array2table(dax_comp_ret_disc_array);
 dax_comp_ret_disc.Properties.RowNames = row_names;
 dax_comp_ret_disc.Properties.VariableNames = col_names;
+

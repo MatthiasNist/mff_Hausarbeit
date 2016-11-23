@@ -194,7 +194,7 @@ vector_w_products = [w_dpw_tka_cbk_dbk(:,1:3).*w_dpw_tka_cbk_dbk(:,2:4),...
 portfolio_std_dev_4 = sqrt((w_dpw_tka_cbk_dbk.^2)*(matrix_sd_4.^2)'+2*(vector_w_products* ...
     vector_cov_4'));      
 
-%% plotting again
+%% plotting of results:
 
 figure
 plot(param_table.std_dev, param_table.expected, 'r.')
@@ -203,26 +203,38 @@ ylabel('expected percentage return')
 title('Statistics of DAX-30s Companies (2000 - 2015)')
 hold on
 
+% plotting portfolio-simulations:
 plot(portfolio_std_dev_4, portfolio_ret_4, 'b.')
 hold on
+
+% plotting the investigated companies in green:
+
+dbk_tka_cbk_dpw = plot([param_table{'DPW_DE', 'std_dev'}, ...
+    param_table{'TKA_DE', 'std_dev'}, param_table{'CBK_DE', 'std_dev'}, ...
+    param_table{'DBK_DE', 'std_dev'}], [param_table{'DPW_DE', ...
+    'expected'}, param_table{'TKA_DE', 'expected'}, ...
+    param_table{'CBK_DE', 'expected'}, param_table{'DBK_DE', 'expected'}...
+    ], 'go')
+set(dbk_tka_cbk_dpw,'MarkerEdgeColor','none','MarkerFaceColor','g')
+
 dpw_display = text(param_table{'DPW_DE', 'std_dev'}, ...
     param_table{'DPW_DE', 'expected'}+0.004, 'DPW_DE', 'interpreter', 'none')
-dpw_display(1).Color = 'black';
+dpw_display(1).Color = 'green';
 dpw_display(1).FontSize = 6;
 
 dbk_display = text(param_table{'DBK_DE', 'std_dev'}, ...
     param_table{'DBK_DE', 'expected'}+0.004, 'DBK_DE', 'interpreter', 'none')
-dbk_display(1).Color = 'black';
+dbk_display(1).Color = 'green';
 dbk_display(1).FontSize = 6;
 
 dbk_display = text(param_table{'CBK_DE', 'std_dev'}, ...
     param_table{'CBK_DE', 'expected'}+0.004, 'CBK_DE', 'interpreter', 'none')
-dbk_display(1).Color = 'black';
+dbk_display(1).Color = 'green';
 dbk_display(1).FontSize = 6;
 
 dbk_display = text(param_table{'TKA_DE', 'std_dev'}, ...
     param_table{'TKA_DE', 'expected'}+0.004, 'TKA_DE', 'interpreter', 'none')
-dbk_display(1).Color = 'black';
+dbk_display(1).Color = 'green';
 dbk_display(1).FontSize = 6;
 
 %% letzte Teilaufgabe:

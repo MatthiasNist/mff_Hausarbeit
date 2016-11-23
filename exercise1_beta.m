@@ -4,7 +4,7 @@ tickSym = 'DBK.DE';     % Ticker symbol of Deutsche Bank AG (https://de.finance.
 dateBeg = '01012000';   %  first observation on first of January 2000
 dateEnd = '01012015'; % Last observation on first of January 2015
 
-dbk_data = getPrices(dateBeg, dateEnd, tickSym)
+dbk_data = getPrices(dateBeg, dateEnd, tickSym);
 
 % calculating logarithmic returns
 dbk_returns = price2retWithHolidays(dbk_data);
@@ -14,9 +14,8 @@ dbk_returns = price2retWithHolidays(dbk_data);
 dats = datenum(dbk_returns.Properties.RowNames, 'yyyy-mm-dd');
 
 dbk_returns_vec = dbk_returns.(1) % Vector of dbk_returns
-dbk_returns_vec_rev = dbk_returns_vec(end:-1:1); %die Daten sind falschrum
-% sie müssen umgedreht werden, auch wenn ich mir bezüglich des späteren
-% Outputs die Konjunkturdaten anschaue (Finanzkrise 2008)
+dbk_returns_vec_rev = dbk_returns_vec(end:-1:1); % the data has to be set
+% upside-down, (so financial crisis in 2008 can be seen)
 
 logRets = 100*dbk_returns_vec_rev % vector of logarithmic returns
 
@@ -24,10 +23,11 @@ logRets = 100*dbk_returns_vec_rev % vector of logarithmic returns
 % specifying the object 
 object_specif = garch('Constant', NaN, 'GARCHLags',1,'ARCHLags',1) 
 
-% plus a conditional mean model offset
+% alternative: conditional mean model offset
 % object_specif = garch('Constant', NaN, 'GARCHLags',1,'ARCHLags',1,'Offset',NaN) 
 
-% estimate-method for object of class "GARCH" => calculation of process-parameters
+% estimate-method for object of class "GARCH" => calculation of process-
+% parameters
 [params output] = estimate(object_specif, logRets)
 print(params,output)
 
@@ -38,13 +38,10 @@ k = params.Constant % constant term
 
 var = infer(params, logRets)
 
+% evaluating the critical value for alpha = 5%
 alphaLevels = 1 - [0.95];
 sigma = sqrt(var)
-val_pdf_crit = norminv(alphaLevels, k, sigma) % Mittelwert k oder offset?
-
-%mit Offset:
-%val_pdf_crit = norminv(alphaLevels, offset, sigma)
-
+val_pdf_crit = norminv(alphaLevels, k, sigma) 
 
 figure('position', [50 50 1200 600])
 
@@ -69,7 +66,7 @@ plot(dats, val_pdf_crit,':k')
 % labeling of plot
 xlabel('dates')
 ylabel('logarithmic returns')
-title('historic Deutsche Bank returns and VaR exceedances')
+title('historical Deutsche Bank returns and VaR exceedances')
 
 % frequency of exceedances:
 freq_exceed = numel(find(logRets < val_pdf_crit))/length(logRets)
@@ -79,20 +76,6 @@ freq_text = text(dats(end-ceil((length(dats)/4))), -15, ...
     ['frequency of exceedances: ' num2str(freq_exceed*100) '%'])
 freq_text(1).Color = 'red';
 freq_text(1).FontSize = 12;
-
-
-
-%% Überprüfung Varianz (langsamer)
-
-% sigmaHat0 = 2;
-% 
-% retrieveSigmas = zeros(numel(y), 1);
-% retrieveSigmas(1) = sigmaHat0;
-% 
-% for ii=2:numel(y)
-%     retrieveSigmas(ii) = sqrt(k + garch*retrieveSigmas(ii-1).^2 +...
-%         arch*y(ii-1).^2);
-% end
 
 %% simulate
 

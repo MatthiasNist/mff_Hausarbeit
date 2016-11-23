@@ -57,5 +57,16 @@ logRets_exceed = logRets(exceedances);
 
 plot(dats_exceed, logRets_exceed, '.r')
 
+%% retrieve real sigmas (baut auf logRets statt y auf)
+sigmaHat0 = 1;
+k = 0.05;
 
+%preallocation
+retrieveSigmas = zeros(numel(logRets), 1);
+retrieveSigmas(1) = sigmaHat0;
+
+for ii=2:numel(logRets)
+    retrieveSigmas(ii) = sqrt(k + garch_val*retrieveSigmas(ii-1).^2 +...
+        arch_val*logRets(ii-1).^2)
+end
 
